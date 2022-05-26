@@ -30,6 +30,13 @@ func (c *Cache) Get(key string) (string, bool) {
 func (c *Cache) Put(key, value string) {
 
 	c.CacheMap[key] = value
+
+	_, ok := c.TimerMap[key]
+
+	if ok {
+		delete(c.TimerMap, key)
+	}
+
 }
 
 func (c *Cache) Keys() []string {
