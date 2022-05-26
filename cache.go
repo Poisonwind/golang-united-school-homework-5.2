@@ -17,6 +17,13 @@ func NewCache() Cache {
 
 func (c *Cache) Get(key string) (string, bool) {
 
+	_, ok := c.TimerMap[key] 
+
+	if !ok {
+		res, ok := c.CacheMap[key]
+		return res, ok
+	}
+
 	if c.TimerMap[key].Before(time.Now()) {
 		delete(c.TimerMap, key)
 		delete(c.CacheMap, key)
