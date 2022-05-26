@@ -3,21 +3,59 @@ package cache
 import "time"
 
 type Cache struct {
+	CacheMap map[string]string
+	TimerMap map[string]time.Time
 }
 
 func NewCache() Cache {
 	return Cache{}
 }
 
-func (receiver) Get(key string) (string, bool) {
+func (c *Cache) Get(key string) (string, bool) {
+
+	if c.TimerMap[key].Before(time.Now()) {
+		delete(c.TimerMap, key)
+		delete(c.CacheMap, key)
+	}
+
+	res, ok := c.CacheMap[key]
+
+	return res, ok
+}
+
+func (c *Cache) Put(key, value string) {
+
+	c.CacheMap[key] = value
+}
+
+func (c *Cache) Keys() []string {
+
+	result := []string{}
+
+	c.ClearCache()
+
+	for key := range (c.CacheMap) {
+		result = append(result, key)
+	}
+
+	return result
 
 }
 
-func (receiver) Put(key, value string) {
+func (c *Cache) PutTill(key, value string, deadline time.Time) {
+
+	c.CacheMap[key] = value
+	c.TimerMap[key] = deadline
+
 }
 
-func (receiver) Keys() []string {
-}
+func (c *Cache) ClearCache() {
 
-func (receiver) PutTill(key, value string, deadline time.Time) {
+	for key, val := range(c.TimerMap) {
+		if val.Before(time.Now()) {
+			delete(c.TimerMap, key)
+			delete(c.CacheMap, key)
+		}
+	}
+
 }
